@@ -1,18 +1,4 @@
-import { sampleTasks, generateTaskId } from "./data.js";
-
-import {
-  normalizeTaskText,
-  calculateTaskCounts
-} from "./utils.js";
-
-import {
-  createTaskElement,
-  createTaskText,
-  createEditInput,
-  displayTaskCounts
-} from "./display.js";
-
-export { createTaskElement };
+"use strict";
 
 const taskInput = document.getElementById("taskInput");
 const addTaskBtn = document.getElementById("addTaskBtn");
@@ -23,14 +9,48 @@ const totalCount = document.getElementById("totalCount");
 const pendingCount = document.getElementById("pendingCount");
 const completedCount = document.getElementById("completedCount");
 
-const countElements = {
-  totalCount,
-  pendingCount,
-  completedCount
-};
+let nextTaskId = 1;
 
-export function addTask(taskText) {
-  const trimmedText = normalizeTaskText(taskText);
+function generateTaskId() {
+  return `task-${nextTaskId++}`;
+}
+
+function createTaskElement(taskText, taskId) {
+  const taskItem = document.createElement("li");
+  taskItem.classList.add("task-item");
+  taskItem.dataset.taskId = taskId;
+  taskItem.dataset.state = "pending";
+
+  const taskTextSpan = document.createElement("span");
+  taskTextSpan.classList.add("task-text");
+  taskTextSpan.textContent = taskText;
+
+  taskItem.appendChild(taskTextSpan);
+
+  const buttonDefinitions = [
+    { className: "complete-btn", label: "Complete" },
+    { className: "edit-btn", label: "Edit" },
+    { className: "remove-btn", label: "Remove" }
+  ];
+
+  buttonDefinitions.forEach(({ className, label }) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.classList.add(className);
+    button.textContent = label;
+
+    if (className === "complete-btn") {
+      button.setAttribute("aria-pressed", "false");
+    }
+
+    taskItem.appendChild(button);
+  });
+
+  return taskItem;
+}
+
+function addTask(taskText) {
+  const trimmedText = taskText.trim();
 
   if (trimmedText === "") {
     taskMessage.textContent = "Task cannot be empty";
@@ -38,11 +58,7 @@ export function addTask(taskText) {
     return;
   }
 
-  const taskItem = createTaskElement(
-    trimmedText,
-    generateTaskId()
-  );
-
+  const taskItem = createTaskElement(trimmedText, generateTaskId());
   taskList.appendChild(taskItem);
 
   taskInput.value = "";
@@ -52,29 +68,30 @@ export function addTask(taskText) {
   taskInput.focus();
 }
 
-export function toggleTaskComplete(taskItem) {
+function toggleTaskComplete(taskItem) {
   const isCompleted = taskItem.classList.toggle("completed");
 
-  taskItem.dataset.state = isCompleted
-    ? "completed"
-    : "pending";
+  taskItem.dataset.state = isCompleted ? "completed" : "pending";
 
-  taskItem.querySelector(".complete-btn").setAttribute(
-    "aria-pressed",
-    String(isCompleted)
-  );
+  const completeButton = taskItem.querySelector(".complete-btn");
+  completeButton.setAttribute("aria-pressed", String(isCompleted));
 
   updateTaskCounts();
 }
 
-export function beginTaskEdit(taskItem) {
+function beginTaskEdit(taskItem) {
   const taskTextSpan = taskItem.querySelector(".task-text");
 
   if (!taskTextSpan) {
     return;
   }
 
-  const editInput = createEditInput(taskTextSpan.textContent);
+  const editInput = document.createElement("input");
+  editInput.type = "text";
+  editInput.classList.add("edit-input");
+  editInput.value = taskTextSpan.textContent;
+  editInput.setAttribute("aria-label", "Edit task");
+  editInput.setAttribute("aria-describedby", "taskMessage");
 
   taskTextSpan.replaceWith(editInput);
 
@@ -85,14 +102,14 @@ export function beginTaskEdit(taskItem) {
   editInput.select();
 }
 
-export function saveTaskEdit(taskItem) {
+function saveTaskEdit(taskItem) {
   const editInput = taskItem.querySelector(".edit-input");
 
   if (!editInput) {
     return;
   }
 
-  const trimmedText = normalizeTaskText(editInput.value);
+  const trimmedText = editInput.value.trim();
 
   if (trimmedText === "") {
     taskMessage.textContent = "Task cannot be empty";
@@ -100,7 +117,9 @@ export function saveTaskEdit(taskItem) {
     return;
   }
 
-  const taskTextSpan = createTaskText(trimmedText);
+  const taskTextSpan = document.createElement("span");
+  taskTextSpan.classList.add("task-text");
+  taskTextSpan.textContent = trimmedText;
 
   editInput.replaceWith(taskTextSpan);
 
@@ -110,18 +129,31 @@ export function saveTaskEdit(taskItem) {
   updateTaskCounts();
 }
 
-export function removeTask(taskItem) {
+function removeTask(taskItem) {
   taskItem.remove();
   taskMessage.textContent = "";
   updateTaskCounts();
 }
 
-export function updateTaskCounts() {
-  const counts = calculateTaskCounts(taskList);
-  displayTaskCounts(countElements, counts);
+function updateTaskCounts() {
+  const taskItems = Array.from(
+    taskList.querySelectorAll(".task-item")
+  );
+
+  const pending = taskItems.filter(
+    (taskItem) => taskItem.dataset.state === "pending"
+  ).length;
+
+  const completed = taskItems.filter(
+    (taskItem) => taskItem.dataset.state === "completed"
+  ).length;
+
+  totalCount.textContent = String(taskItems.length);
+  pendingCount.textContent = String(pending);
+  completedCount.textContent = String(completed);
 }
 
-export function handleTaskListClick(event) {
+function handleTaskListClick(event) {
   if (!(event.target instanceof Element)) {
     return;
   }
@@ -151,15 +183,17 @@ export function handleTaskListClick(event) {
   }
 }
 
-export function loadSampleTasks() {
+function loadSampleTasks() {
+  const sampleTasks = [
+    "Review DOM selectors",
+    "Practice createElement",
+    "Study event delegation"
+  ];
+
   const fragment = document.createDocumentFragment();
 
   sampleTasks.forEach((taskText) => {
-    const taskItem = createTaskElement(
-      taskText,
-      generateTaskId()
-    );
-
+    const taskItem = createTaskElement(taskText, generateTaskId());
     fragment.appendChild(taskItem);
   });
 

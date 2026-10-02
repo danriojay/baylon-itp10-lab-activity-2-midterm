@@ -1,6 +1,5 @@
 "use strict";
 
-// Store the required DOM elements.
 const taskInput = document.getElementById("taskInput");
 const addTaskBtn = document.getElementById("addTaskBtn");
 const loadSamplesBtn = document.getElementById("loadSamplesBtn");
@@ -16,7 +15,6 @@ function generateTaskId() {
   return `task-${nextTaskId++}`;
 }
 
-// Create a task without attaching it to the live list.
 function createTaskElement(taskText, taskId) {
   const taskItem = document.createElement("li");
   taskItem.classList.add("task-item");
@@ -91,8 +89,6 @@ function beginTaskEdit(taskItem) {
   const editInput = document.createElement("input");
   editInput.type = "text";
   editInput.classList.add("edit-input");
-
-  // An input uses value to display editable text safely.
   editInput.value = taskTextSpan.textContent;
   editInput.setAttribute("aria-label", "Edit task");
   editInput.setAttribute("aria-describedby", "taskMessage");
@@ -157,7 +153,6 @@ function updateTaskCounts() {
   completedCount.textContent = String(completed);
 }
 
-// One delegated handler manages all dynamic task buttons.
 function handleTaskListClick(event) {
   if (!(event.target instanceof Element)) {
     return;
@@ -202,7 +197,6 @@ function loadSampleTasks() {
     fragment.appendChild(taskItem);
   });
 
-  // Insert all three tasks into the live list in one operation.
   taskList.appendChild(fragment);
 
   taskMessage.textContent = "";
@@ -215,10 +209,8 @@ addTaskBtn.addEventListener("click", () => {
 
 loadSamplesBtn.addEventListener("click", loadSampleTasks);
 
-// Exactly one click listener on the task list.
 taskList.addEventListener("click", handleTaskListClick);
 
-// Allow Enter to add a task.
 taskInput.addEventListener("keydown", (event) => {
   if (event.key === "Enter") {
     event.preventDefault();
@@ -226,5 +218,4 @@ taskInput.addEventListener("keydown", (event) => {
   }
 });
 
-// Start with an empty list and counts calculated from the DOM.
 updateTaskCounts();

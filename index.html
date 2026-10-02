@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Secure Dynamic Task Manager</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="js/app.js" defer></script>
+</head>
+<body>
+  <main class="container">
+    <h1>Secure Dynamic Task Manager</h1>
+    <p class="subtitle">Add, complete, edit, and remove your tasks.</p>
+
+    <label for="taskInput">New task</label>
+
+    <div class="input-row">
+      <input
+        type="text"
+        id="taskInput"
+        placeholder="Enter a task"
+        aria-describedby="taskMessage"
+      >
+      <button type="button" id="addTaskBtn">Add Task</button>
+    </div>
+
+    <p id="taskMessage" role="alert"></p>
+
+    <button type="button" id="loadSamplesBtn">
+      Load Sample Tasks
+    </button>
+
+    <section class="summary" aria-label="Task summary" aria-live="polite">
+      <p>Total Tasks: <strong id="totalCount">0</strong></p>
+      <p>Pending: <strong id="pendingCount">0</strong></p>
+      <p>Completed: <strong id="completedCount">0</strong></p>
+    </section>
+
+    <ul id="taskList" aria-label="Tasks"></ul>
+  </main>
+</body>
+</html>
